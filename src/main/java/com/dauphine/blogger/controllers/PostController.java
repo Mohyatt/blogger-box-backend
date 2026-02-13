@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/v1/posts")
@@ -47,7 +48,7 @@ public class PostController {
     @ApiResponse(responseCode = "404", description = "Post non trouvé")
     @ApiResponse(responseCode = "400", description = "Données invalides")
     public ResponseEntity<Post> update(
-            @Parameter(description = "Identifiant du post") @PathVariable Long id,
+            @Parameter(description = "Identifiant du post") @PathVariable UUID id,
             @Valid @RequestBody PostRequestDto dto) {
         return postService.update(id, dto.getTitle(), dto.getContent(), dto.getCategoryId())
                 .map(ResponseEntity::ok)
@@ -59,7 +60,7 @@ public class PostController {
     @ApiResponse(responseCode = "204", description = "Post supprimé")
     @ApiResponse(responseCode = "404", description = "Post non trouvé")
     public ResponseEntity<Void> delete(
-            @Parameter(description = "Identifiant du post") @PathVariable Long id) {
+            @Parameter(description = "Identifiant du post") @PathVariable UUID id) {
         return postService.deleteById(id)
                 ? ResponseEntity.noContent().build()
                 : ResponseEntity.notFound().build();

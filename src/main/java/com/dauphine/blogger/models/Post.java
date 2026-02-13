@@ -1,32 +1,53 @@
 package com.dauphine.blogger.models;
 
-import java.time.LocalDate;
-import java.util.Objects;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
+import java.time.LocalDateTime;
+import java.util.Objects;
+import java.util.UUID;
+
+@Entity
+@Table(name = "post")
 public class Post {
 
-    private Long id;
+    @Id
+    @Column(name = "id")
+    private UUID id;
+
+    @Column(name = "title")
     private String title;
+
+    @Column(name = "content")
     private String content;
-    private Long categoryId;
-    private LocalDate createdAt;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    @Column(name = "created_date")
+    private LocalDateTime createdAt;
 
     public Post() {
     }
 
-    public Post(Long id, String title, String content, Long categoryId, LocalDate createdAt) {
+    public Post(UUID id, String title, String content, Category category, LocalDateTime createdAt) {
         this.id = id;
         this.title = title;
         this.content = content;
-        this.categoryId = categoryId;
+        this.category = category;
         this.createdAt = createdAt;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -46,19 +67,19 @@ public class Post {
         this.content = content;
     }
 
-    public Long getCategoryId() {
-        return categoryId;
+    public Category getCategory() {
+        return category;
     }
 
-    public void setCategoryId(Long categoryId) {
-        this.categoryId = categoryId;
+    public void setCategory(Category category) {
+        this.category = category;
     }
 
-    public LocalDate getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDate createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 

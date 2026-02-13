@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.UUID;
+
 @Schema(description = "Requête de création ou mise à jour d'un post")
 public class PostRequestDto {
 
@@ -16,8 +18,8 @@ public class PostRequestDto {
     private String content;
 
     @NotNull(message = "L'identifiant de catégorie est obligatoire")
-    @Schema(description = "Identifiant de la catégorie", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
-    private Long categoryId;
+    @Schema(description = "Identifiant de la catégorie", example = "550e8400-e29b-41d4-a716-446655440000", requiredMode = Schema.RequiredMode.REQUIRED)
+    private UUID categoryId;
 
     public String getTitle() {
         return title;
@@ -35,11 +37,11 @@ public class PostRequestDto {
         this.content = content;
     }
 
-    public Long getCategoryId() {
+    public UUID getCategoryId() {
         return categoryId;
     }
 
-    public void setCategoryId(Long categoryId) {
+    public void setCategoryId(UUID categoryId) {
         this.categoryId = categoryId;
     }
 }

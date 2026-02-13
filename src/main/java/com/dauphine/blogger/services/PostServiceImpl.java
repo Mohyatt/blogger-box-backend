@@ -1,70 +1,78 @@
 package com.dauphine.blogger.services;
 
+import com.dauphine.blogger.models.Category;
 import com.dauphine.blogger.models.Post;
+import com.dauphine.blogger.repositories.CategoryRepository;
+import com.dauphine.blogger.repositories.PostRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.util.Comparator;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 @Service
 public class PostServiceImpl implements PostService {
 
-    private final List<Post> posts = new CopyOnWriteArrayList<>();
-    private final AtomicLong idGenerator = new AtomicLong(1);
+    private final PostRepository postRepository;
+    private final CategoryRepository categoryRepository;
+
+    public PostServiceImpl(PostRepository postRepository, CategoryRepository categoryRepository) {
+        this.postRepository = postRepository;
+        this.categoryRepository = categoryRepository;
+    }
 
     @Override
     public List<Post> findAllOrderByCreatedAtDesc() {
-        return posts.stream()
-                .sorted(Comparator.comparing(Post::getCreatedAt).reversed())
-                .collect(Collectors.toList());
+        return postRepository.findAllByOrderByCreatedAtDesc();
     }
 
     @Override
-    public Optional<Post> findById(Long id) {
-        return posts.stream()
-                .filter(p -> p.getId().equals(id))
-                .findFirst();
+    public Optional<Post> findById(UUID id) {
+        return postRepository.findById(id);
     }
 
     @Override
-    public Post create(String title, String content, Long categoryId) {
+    public Post create(String title, String content, UUID categoryId) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("Category not found: " + categoryId));
+
         Post post = new Post(
-                idGenerator.getAndIncrement(),
+                UUID.randomUUID(),
                 title,
                 content,
-                categoryId,
-                LocalDate.now()
+                category,
+                LocalDateTime.now()
         );
-        posts.add(post);
-        return post;
+        return postRepository.save(post);
     }
 
     @Override
-    public Optional<Post> update(Long id, String title, String content, Long categoryId) {
-        return findById(id)
-                .map(p -> {
-                    p.setTitle(title);
-                    p.setContent(content);
-                    p.setCategoryId(categoryId);
-                    return p;
+    public Optional<Post> update(UUID id, String title, String content, UUID categoryId) {
+        return postRepository.findById(id)
+                .map(existing -> {
+                    Category category = categoryRepository.findById(categoryId)
+                            .orElseThrow(() -> new IllegalArgumentException("Category not found: " + categoryId));
+                    existing.setTitle(title);
+                    existing.setContent(content);
+                    existing.setCategory(category);
+                    return postRepository.save(existing);
                 });
     }
 
     @Override
-    public boolean deleteById(Long id) {
-        return posts.removeIf(p -> p.getId().equals(id));
+    public boolean deleteById(UUID id) {
+        if (!postRepository.existsById(id)) {
+            return false;
+        }
+        postRepository.deleteById(id);
+        return true;
     }
 
     @Override
-    public List<Post> findAllByCategoryId(Long categoryId) {
-        return posts.stream()
-                .filter(p -> p.getCategoryId().equals(categoryId))
-                .sorted(Comparator.comparing(Post::getCreatedAt).reversed())
-                .collect(Collectors.toList());
+    public List<Post> findAllByCategoryId(UUID categoryId) {
+        return categoryRepository.findById(categoryId)
+                .map(postRepository::findAllByCategoryOrderByCreatedAtDesc)
+                .orElse(List.of());
     }
 }

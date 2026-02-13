@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/v1/categories")
@@ -38,7 +39,7 @@ public class CategoryController {
     @ApiResponse(responseCode = "200", description = "Catégorie trouvée")
     @ApiResponse(responseCode = "404", description = "Catégorie non trouvée")
     public ResponseEntity<Category> getById(
-            @Parameter(description = "Identifiant de la catégorie") @PathVariable Long id) {
+            @Parameter(description = "Identifiant de la catégorie") @PathVariable UUID id) {
         return categoryService.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -59,7 +60,7 @@ public class CategoryController {
     @ApiResponse(responseCode = "404", description = "Catégorie non trouvée")
     @ApiResponse(responseCode = "400", description = "Données invalides")
     public ResponseEntity<Category> updateName(
-            @Parameter(description = "Identifiant de la catégorie") @PathVariable Long id,
+            @Parameter(description = "Identifiant de la catégorie") @PathVariable UUID id,
             @Valid @RequestBody CategoryRequestDto dto) {
         return categoryService.updateName(id, dto.getName())
                 .map(ResponseEntity::ok)
@@ -71,7 +72,7 @@ public class CategoryController {
     @ApiResponse(responseCode = "204", description = "Catégorie supprimée")
     @ApiResponse(responseCode = "404", description = "Catégorie non trouvée")
     public ResponseEntity<Void> delete(
-            @Parameter(description = "Identifiant de la catégorie") @PathVariable Long id) {
+            @Parameter(description = "Identifiant de la catégorie") @PathVariable UUID id) {
         return categoryService.deleteById(id)
                 ? ResponseEntity.noContent().build()
                 : ResponseEntity.notFound().build();
@@ -82,7 +83,7 @@ public class CategoryController {
     @ApiResponse(responseCode = "200", description = "Liste des posts")
     @ApiResponse(responseCode = "404", description = "Catégorie non trouvée")
     public ResponseEntity<List<Post>> getPostsByCategoryId(
-            @Parameter(description = "Identifiant de la catégorie") @PathVariable Long id) {
+            @Parameter(description = "Identifiant de la catégorie") @PathVariable UUID id) {
         if (categoryService.findById(id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
