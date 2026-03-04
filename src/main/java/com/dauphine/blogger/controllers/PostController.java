@@ -27,10 +27,14 @@ public class PostController {
     }
 
     @GetMapping
-    @Operation(summary = "Liste tous les posts", description = "Retourne tous les posts triés par date de création (décroissant)")
+    @Operation(
+            summary = "Liste tous les posts",
+            description = "Retourne tous les posts triés par date de création (décroissant) ou filtrés par valeur présente dans le titre ou le contenu"
+    )
     @ApiResponse(responseCode = "200", description = "Liste des posts")
-    public ResponseEntity<List<Post>> getAll() {
-        return ResponseEntity.ok(postService.findAllOrderByCreatedAtDesc());
+    public ResponseEntity<List<Post>> getAll(
+            @RequestParam(name = "value", required = false) String value) {
+        return ResponseEntity.ok(postService.getAll(value));
     }
 
     @PostMapping
@@ -50,9 +54,8 @@ public class PostController {
     public ResponseEntity<Post> update(
             @Parameter(description = "Identifiant du post") @PathVariable UUID id,
             @Valid @RequestBody PostRequestDto dto) {
-        return postService.update(id, dto.getTitle(), dto.getContent(), dto.getCategoryId())
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        Post updated = postService.update(id, dto.getTitle(), dto.getContent(), dto.getCategoryId());
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
@@ -61,8 +64,7 @@ public class PostController {
     @ApiResponse(responseCode = "404", description = "Post non trouvé")
     public ResponseEntity<Void> delete(
             @Parameter(description = "Identifiant du post") @PathVariable UUID id) {
-        return postService.deleteById(id)
-                ? ResponseEntity.noContent().build()
-                : ResponseEntity.notFound().build();
+        postService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }

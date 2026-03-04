@@ -28,10 +28,13 @@ public class CategoryController {
     }
 
     @GetMapping
-    @Operation(summary = "Liste toutes les catégories", description = "Retourne la liste de toutes les catégories")
+    @Operation(
+            summary = "Liste toutes les catégories",
+            description = "Retrieve all categories or filter by name using query parameter"
+    )
     @ApiResponse(responseCode = "200", description = "Liste des catégories")
-    public ResponseEntity<List<Category>> getAll() {
-        return ResponseEntity.ok(categoryService.findAll());
+    public ResponseEntity<List<Category>> findAll(@RequestParam(required = false) String name) {
+        return ResponseEntity.ok(categoryService.getAll(name));
     }
 
     @GetMapping("/{id}")
@@ -40,9 +43,8 @@ public class CategoryController {
     @ApiResponse(responseCode = "404", description = "Catégorie non trouvée")
     public ResponseEntity<Category> getById(
             @Parameter(description = "Identifiant de la catégorie") @PathVariable UUID id) {
-        return categoryService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        Category category = categoryService.findById(id);
+        return ResponseEntity.ok(category);
     }
 
     @PostMapping
@@ -62,9 +64,8 @@ public class CategoryController {
     public ResponseEntity<Category> updateName(
             @Parameter(description = "Identifiant de la catégorie") @PathVariable UUID id,
             @Valid @RequestBody CategoryRequestDto dto) {
-        return categoryService.updateName(id, dto.getName())
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        Category updated = categoryService.updateName(id, dto.getName());
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
@@ -73,9 +74,8 @@ public class CategoryController {
     @ApiResponse(responseCode = "404", description = "Catégorie non trouvée")
     public ResponseEntity<Void> delete(
             @Parameter(description = "Identifiant de la catégorie") @PathVariable UUID id) {
-        return categoryService.deleteById(id)
-                ? ResponseEntity.noContent().build()
-                : ResponseEntity.notFound().build();
+        categoryService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}/posts")
@@ -84,9 +84,7 @@ public class CategoryController {
     @ApiResponse(responseCode = "404", description = "Catégorie non trouvée")
     public ResponseEntity<List<Post>> getPostsByCategoryId(
             @Parameter(description = "Identifiant de la catégorie") @PathVariable UUID id) {
-        if (categoryService.findById(id).isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(categoryService.findPostsByCategoryId(id));
+        List<Post> posts = categoryService.findPostsByCategoryId(id);
+        return ResponseEntity.ok(posts);
     }
 }

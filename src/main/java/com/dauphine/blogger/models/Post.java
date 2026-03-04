@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 @Entity
 @Table(name = "post")
 public class Post {
@@ -29,6 +31,7 @@ public class Post {
     @JoinColumn(name = "category_id")
     private Category category;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     @Column(name = "created_date")
     private LocalDateTime createdAt;
 

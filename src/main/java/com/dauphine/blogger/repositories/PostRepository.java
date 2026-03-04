@@ -12,5 +12,8 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     List<Post> findAllByOrderByCreatedAtDesc();
 
     List<Post> findAllByCategoryOrderByCreatedAtDesc(Category category);
+
+    List<Post> findByTitleContainingIgnoreCaseOrContentContainingIgnoreCaseOrderByCreatedAtDesc(
+            String title, String content);
 }
 

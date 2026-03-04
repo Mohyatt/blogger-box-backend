@@ -1,5 +1,6 @@
 package com.dauphine.blogger.services;
 
+import com.dauphine.blogger.exceptions.ResourceNotFoundException;
 import com.dauphine.blogger.models.Category;
 import com.dauphine.blogger.models.Post;
 import com.dauphine.blogger.repositories.CategoryRepository;
@@ -7,7 +8,6 @@ import com.dauphine.blogger.repositories.PostRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -27,8 +27,17 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Optional<Category> findById(UUID id) {
-        return categoryRepository.findById(id);
+    public List<Category> getAll(String name) {
+        if (name == null || name.isBlank()) {
+            return categoryRepository.findAll();
+        }
+        return categoryRepository.findByNameContainingIgnoreCase(name);
+    }
+
+    @Override
+    public Category findById(UUID id) {
+        return categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Category", id.toString()));
     }
 
     @Override
@@ -38,27 +47,26 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Optional<Category> updateName(UUID id, String name) {
-        return categoryRepository.findById(id)
-                .map(category -> {
-                    category.setName(name);
-                    return categoryRepository.save(category);
-                });
+    public Category updateName(UUID id, String name) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Category", id.toString()));
+        category.setName(name);
+        return categoryRepository.save(category);
     }
 
     @Override
-    public boolean deleteById(UUID id) {
+    public void deleteById(UUID id) {
         if (!categoryRepository.existsById(id)) {
-            return false;
+            throw new ResourceNotFoundException("Category", id.toString());
         }
         categoryRepository.deleteById(id);
-        return true;
     }
 
     @Override
     public List<Post> findPostsByCategoryId(UUID categoryId) {
-        return categoryRepository.findById(categoryId)
-                .map(postRepository::findAllByCategoryOrderByCreatedAtDesc)
-                .orElse(List.of());
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category", categoryId.toString()));
+        return postRepository.findAllByCategoryOrderByCreatedAtDesc(category);
     }
 }
+
